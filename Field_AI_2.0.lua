@@ -152,6 +152,23 @@ local Title = new("TextLabel", {Parent = Header, Size = UDim2.new(1,-10,1,0), Po
 
 local Status = new("TextLabel", {Position = UDim2.fromOffset(8, 52), Size = UDim2.new(1,-16,0,36), BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(185,220,195), TextSize = 13, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, Parent = Main})
 
+-- status updater (fix: was missing and caused errors)
+local function status(message)
+    if Status and Status.Parent then
+        Status.Text = tostring(message or "")
+    end
+end
+
+-- connectOnce helper (one-shot connections)
+local function connectOnce(event, fn)
+    local conn
+    conn = event:Connect(function(...)
+        if conn then conn:Disconnect() end
+        pcall(fn, ...)
+    end)
+    return conn
+end
+
 -- Buttons grid
 local ButtonsFrame = new("Frame", {Position = UDim2.fromOffset(8,96), Size = UDim2.new(1,-16,0,320), BackgroundTransparency = 1, Parent = Main})
 local Grid = new("UIGridLayout", {CellSize = UDim2.new(0,170,0,48), CellPadding = UDim2.new(0,8,0,8), FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Left, VerticalAlignment = Enum.VerticalAlignment.Top, Parent = ButtonsFrame})
@@ -365,7 +382,7 @@ Buttons.clear.Activated:Connect(function()
     TextBox.Text = ""
     BtnImport.Text = tr("yes")
     Modal.Visible = true
-    BtnImport.Activated:ConnectOnce(function()
+    connectOnce(BtnImport.Activated, function()
         clearData()
         Modal.Visible = false
     end)
